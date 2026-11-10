@@ -1,6 +1,6 @@
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/banner-static.png">
-  <img src="assets/banner.gif" alt="Vinicius Canonici — cyan and magenta neon lights illuminate a rainy futuristic city" width="1200" height="400">
+  <img src="assets/banner.gif" alt="Vinicius Canonici — cyan and magenta neon lights illuminate a rainy futuristic city" width="1200">
 </picture>
 
 # Hi, I'm Vinicius.
