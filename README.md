@@ -1,5 +1,6 @@
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/banner-static.png">
+  <source type="image/webp" srcset="assets/banner.webp">
   <img src="assets/banner.gif" alt="Vinicius Canonici — cyan and magenta neon lights illuminate a rainy futuristic city" width="1200">
 </picture>
 

@@ -1,41 +1,46 @@
 <!doctype html>
 <html lang="en"><meta charset="utf-8"><title>Vinicius Canonici — neon city banner</title>
 <style>@font-face{font-family:Orbitron;src:url('../assets/Orbitron.ttf')}*{box-sizing:border-box}body{margin:0;background:#080d24;color:#f3f6ff;font-family:system-ui}canvas{display:block;width:100%;height:auto;max-width:1200px;margin:0 auto}p{max-width:70ch;margin:24px auto;padding:0 20px}a{color:#00e5ff}</style>
-<canvas width="1200" height="400" aria-label="Vinicius Canonici, surrounded by cyan and magenta neon in a rainy futuristic city"></canvas>
-<p>Original profile banner. <a href="../assets/banner-static.png">Static version</a>. The animation is a four-second loop; its light changes are gradual.</p>
+<canvas width="1200" height="400" aria-label="Vinicius Canonici, with cyan and magenta neon illuminating a futuristic city"></canvas>
+<p>Original city artwork with a five-second neon-light loop. <a href="../assets/banner-static.png">Static version</a>.</p>
 <script>
-const canvas=document.querySelector('canvas'), ctx=canvas.getContext('2d');
-const city=new Image(); city.src='../assets/cyberpunk-city.png';
+const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d');
+const city=new Image();city.src='../assets/cyberpunk-city.png';
 const ready=Promise.all([city.decode(),document.fonts.load('700 54px Orbitron')]);
-const tau=Math.PI*2;
-function glowLine(points,color,width,blur,alpha=1){
+const tau=Math.PI*2,frames=125,duration=5000;
+function glowLine(points,color,width,blur,alpha){
  ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.shadowBlur=blur;ctx.shadowColor=color;ctx.lineCap='round';ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.restore();
 }
-function render(t=0){
- ctx.clearRect(0,0,1200,400);ctx.drawImage(city,0,0,1200,400);
- const wash=ctx.createRadialGradient(600,213,30,600,213,410);wash.addColorStop(0,'rgba(8,13,36,.58)');wash.addColorStop(.67,'rgba(8,13,36,.22)');wash.addColorStop(1,'rgba(8,13,36,0)');ctx.fillStyle=wash;ctx.fillRect(0,0,1200,400);
- const cyan=.40+.28*Math.sin(tau*t), magenta=.42+.27*Math.sin(tau*t+2);
- ctx.save();ctx.globalCompositeOperation='screen';
- glowLine([[35,175],[133,190]],'#00e5ff',3,16,cyan);
- glowLine([[45,185],[126,198]],'#00e5ff',2,10,cyan*.8);
- glowLine([[237,12],[236,86]],'#00e5ff',3,17,cyan);
- glowLine([[1138,24],[1130,130]],'#ff2aa1',3,18,magenta);
- glowLine([[1200,115],[1092,153]],'#ff2aa1',4,20,magenta);
- glowLine([[1189,144],[1091,174]],'#ff2aa1',3,16,magenta);
- glowLine([[503,365],[668,365]],'#9254ff',1,8,.15+.1*Math.sin(tau*t));
- // Looping rain. Each streak moves one complete vertical tile per period.
- for(let i=0;i<74;i++){
-  const x=((i*137.23)%1200),y=(((i*79.71)+t*440)%440)-20;
-  glowLine([[x,y],[x-1.5,y+8+(i%8)]],i%3?'#9b9af0':'#79f1ff',.55,0,.06+(i%4)*.022);
- }
- ctx.restore();
- // Typography stays still while light breathes around it.
- ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 54px Orbitron';ctx.fillStyle='#f3f6ff';
- ctx.shadowColor='#00e5ff';ctx.shadowBlur=13+3*Math.sin(tau*t);ctx.fillText('Vinicius Canonici',600,191);
- ctx.shadowBlur=0;ctx.font='20px monospace';ctx.fillStyle='#8eefff';ctx.fillText('@vcanonici',600,247);
- glowLine([[440,274],[760,274]],'#ff2aa1',1.2,10,.65+.12*Math.sin(tau*t+1));
+function light(x,y,radius,color,strength,flatten=1){
+ ctx.save();ctx.translate(x,y);ctx.scale(1,flatten);ctx.globalAlpha=strength;
+ const g=ctx.createRadialGradient(0,0,0,0,0,radius);g.addColorStop(0,color);g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.fillRect(-radius,-radius,radius*2,radius*2);ctx.restore();
 }
-window.renderBanner=async function(t){await ready;render(t)};
-window.exportBanner=async function(){await ready;for(let i=0;i<40;i++){render(i/40);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));const r=await fetch('/__frame/'+String(i).padStart(3,'0'),{method:'POST',body:blob});if(!r.ok)throw Error('Frame export failed '+i);}render(0);return{frames:40,width:1200,height:400,duration:4000}};
-ready.then(()=>{if(location.search.includes('still')){render(0);return}const start=performance.now();function animate(now){render(((now-start)%4000)/4000);requestAnimationFrame(animate)}requestAnimationFrame(animate)});
+function render(t=0){
+ const phase=tau*t,cyan=.5+.5*Math.sin(phase),pink=.5+.5*Math.sin(phase+Math.PI);
+ ctx.clearRect(0,0,1200,400);ctx.drawImage(city,0,0,1200,400);
+ // Light changes stay attached to the city and its wet-pavement reflections.
+ ctx.save();ctx.globalCompositeOperation='screen';
+ light(125,188,235,'#00cfff',.06+.20*cyan);
+ light(1100,173,240,'#ff179b',.06+.22*pink);
+ light(190,380,200,'#00ddff',.08+.23*cyan,.13);
+ light(1015,380,200,'#ff2aa1',.08+.23*pink,.13);
+ glowLine([[3,164],[112,185]],'#38f3ff',2,15,.15+.6*cyan);
+ glowLine([[1100,149],[1199,116]],'#ff55b4',2.5,17,.15+.6*pink);
+ ctx.restore();
+ // Keep the image and lettering steady: only the neon emission changes.
+ const shade=ctx.createRadialGradient(600,210,45,600,210,355);shade.addColorStop(0,'rgba(8,13,36,.62)');shade.addColorStop(.72,'rgba(8,13,36,.28)');shade.addColorStop(1,'rgba(8,13,36,0)');ctx.fillStyle=shade;ctx.fillRect(0,0,1200,400);
+ ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 54px Orbitron';
+ // Continuous complementary emission, with a sharp, always-readable light core.
+ for(const [color,alpha,blur] of [['#00e5ff',.30+.45*cyan,28],['#ff2aa1',.30+.45*pink,18]]){
+  ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=1.7;ctx.shadowColor=color;ctx.shadowBlur=blur;ctx.strokeText('Vinicius Canonici',600,191);
+ }
+ ctx.globalAlpha=1;ctx.shadowBlur=5;ctx.shadowColor='#77eaff';ctx.fillStyle='#f3f6ff';ctx.fillText('Vinicius Canonici',600,191);
+ ctx.shadowBlur=0;ctx.font='20px monospace';ctx.fillStyle='#a8f3ff';ctx.fillText('@vcanonici',600,247);ctx.restore();
+ // Two neon tubes breathe in opposition; there is no travelling scanline or fake rain.
+ glowLine([[444,274],[598,274]],'#00e5ff',1.7,15,.25+.65*cyan);
+ glowLine([[602,274],[756,274]],'#ff2aa1',1.7,15,.25+.65*pink);
+}
+window.renderBanner=async t=>{await ready;render(t)};
+window.exportBanner=async function(){await ready;for(let i=0;i<frames;i++){render(i/frames);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));const r=await fetch('/__frame/'+String(i).padStart(3,'0'),{method:'POST',body:blob});if(!r.ok)throw Error('Frame export failed '+i);}render(0);return{frames,width:1200,height:400,duration}};
+ready.then(()=>{if(location.search.includes('still')||matchMedia('(prefers-reduced-motion: reduce)').matches){render(0);return}const start=performance.now();function animate(now){render(((now-start)%duration)/duration);requestAnimationFrame(animate)}requestAnimationFrame(animate)});
 </script></html>
