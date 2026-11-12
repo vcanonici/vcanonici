@@ -1,7 +1,6 @@
 <picture>
-  <source media="(prefers-reduced-motion: reduce)" srcset="assets/banner-static.png?v=lightning-1">
-  <source type="image/webp" srcset="assets/banner.webp?v=lightning-1">
-  <img src="assets/banner.gif?v=lightning-1" alt="Vinicius Canonici — cyan and magenta neon lights illuminate a rainy futuristic city" width="1200">
+  <source media="(prefers-reduced-motion: reduce)" srcset="assets/banner-static.png?v=vector-smooth-1">
+  <img src="assets/banner.svg?v=vector-smooth-1" alt="Vinicius Canonici — cyan and magenta neon lights illuminate a rainy futuristic city" width="1200">
 </picture>
 
 # Hi, I'm Vinicius.
@@ -26,4 +25,4 @@ This is a documented result for one device, with the limits of the investigation
 
 ---
 
-[Static banner](assets/banner-static.png?v=lightning-1)
+[Static banner](assets/banner-static.png?v=vector-smooth-1)

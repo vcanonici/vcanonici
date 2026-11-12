@@ -34,25 +34,26 @@ function prepareScene(){
  }
  low.getContext('2d').putImageData(lo,0,0);blue.getContext('2d').putImageData(bl,0,0);pink.getContext('2d').putImageData(pk,0,0);
 }
-function smooth(x){return x*x*(3-2*x)}
+function smooth(x){return x*x*x*(x*(x*6-15)+10)}
 function thunder(seconds,start,rise,hold,fall){
  const t=seconds-start;if(t<0||t>=rise+hold+fall)return 0;
  if(t<rise)return smooth(t/rise);if(t<rise+hold)return 1;return 1-smooth((t-rise-hold)/fall);
 }
 function render(t=0){
  const seconds=t*duration/1000;
- const cyan=thunder(seconds,1,.12,.16,1.16),magenta=thunder(seconds,4.65,.16,.18,1.36);
+ const cyan=thunder(seconds,1,.65,.08,1.55),magenta=thunder(seconds,4.55,.75,.08,1.6);
  ctx.globalAlpha=1;ctx.drawImage(low,0,0);
  // Hue and luminance changes affect every matching pixel, including sky and reflections.
  ctx.globalAlpha=cyan;ctx.drawImage(blue,0,0);ctx.globalAlpha=magenta;ctx.drawImage(pink,0,0);ctx.globalAlpha=1;
  const shade=ctx.createRadialGradient(600,210,45,600,210,355);shade.addColorStop(0,'rgba(8,13,36,.48)');shade.addColorStop(.72,'rgba(8,13,36,.18)');shade.addColorStop(1,'rgba(8,13,36,0)');ctx.fillStyle=shade;ctx.fillRect(0,0,1200,400);
  ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 54px Orbitron';
- for(const [color,alpha,blur] of [['#00e5ff',.36+.35*cyan,24],['#ff2aa1',.32+.35*magenta,18]]){
+ for(const [color,alpha,blur] of [['#00e5ff',.48,18],['#ff2aa1',.42,14]]){
   ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.shadowColor=color;ctx.shadowBlur=blur;ctx.strokeText('Vinicius Canonici',600,191);
  }
  ctx.globalAlpha=1;ctx.shadowBlur=4;ctx.shadowColor='#77eaff';ctx.fillStyle='#f3f6ff';ctx.fillText('Vinicius Canonici',600,191);
  ctx.shadowBlur=0;ctx.font='20px monospace';ctx.fillStyle='#a8f3ff';ctx.fillText('@vcanonici',600,247);ctx.restore();
 }
+window.exportLayers=async()=>{await ready;for(const [i,c] of [[200,low],[201,blue],[202,pink]]){const blob=await new Promise(r=>c.toBlob(r,'image/png'));const response=await fetch('/__frame/'+i,{method:'POST',body:blob});if(!response.ok)throw Error('Layer export failed')}return{layers:3}};
 window.renderBanner=async t=>{await ready;render(t)};
 window.exportBanner=async function(){await ready;for(let i=0;i<frames;i++){render(i/frames);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));const r=await fetch('/__frame/'+String(i).padStart(3,'0'),{method:'POST',body:blob});if(!r.ok)throw Error('Frame export failed '+i);}render(.15);return{frames,width:1200,height:400,duration}};
 ready.then(()=>{if(location.search.includes('still')||matchMedia('(prefers-reduced-motion: reduce)').matches){render(.15);return}const start=performance.now();function animate(now){render(((now-start)%duration)/duration);requestAnimationFrame(animate)}requestAnimationFrame(animate)});
